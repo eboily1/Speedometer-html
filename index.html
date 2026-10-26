@@ -2,152 +2,281 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Dashboard Racing</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Speedometer Pro</title>
     <style>
-        body {
-            background-color: #050505;
-            color: #fff;
-            font-family: 'Courier New', Courier, monospace, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+        * {
+            box-sizing: border-box;
             margin: 0;
-            overflow: hidden;
-            letter-spacing: 1px;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
-
-        /* Conteneur principal façon cockpit */
-        .dashboard {
-            position: relative;
-            width: 85vw;
-            height: 55vw;
-            max-height: 90vh;
-            border: 4px solid #1a1a1a;
-            border-radius: 30px;
-            background: linear-gradient(135deg, #111, #000);
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
-
-        /* Arc de cercle bleu (Tachymètre simulé) */
-        .gauge-arc {
-            position: absolute;
-            top: 10%;
-            width: 55vw;
-            height: 55vw;
-            border: 12px dashed #0099ff;
-            border-bottom: 12px solid transparent;
-            border-radius: 50%;
-            box-shadow: 0 0 15px rgba(0, 153, 255, 0.4);
-            box-sizing: border-box;
-        }
-
-        /* Bloc central de vitesse */
-        .center-speed {
-            text-align: center;
-            z-index: 10;
-        }
-        #speed {
-            font-size: 20vw;
-            font-weight: 900;
-            line-height: 0.9;
-            color: #ffffff;
-            text-shadow: 0 0 20px rgba(255,255,255,0.6);
-        }
-        #unit {
-            font-size: 3vw;
-            color: #00ffcc;
-            font-weight: bold;
-        }
-
-        /* Barres latérales (Batterie et Température) */
-        .side-bar {
-            position: absolute;
-            bottom: 25%;
-            width: 2.5vw;
-            height: 15vw;
+        .container {
+            width: 100%;
+            max-width: 375px; /* iPhone 7 Width */
+            height: 100%;
+            max-height: 667px; /* iPhone 7 Height */
+            position: relative;
             display: flex;
-            flex-direction: column-reverse;
-            gap: 4px;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px 20px;
         }
-        .left-bar { left: 10%; }
-        .right-bar { right: 10%; }
-        
-        .segment {
-            flex: 1;
-            border-radius: 2px;
+        #speedometer-canvas {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1;
         }
-        .left-bar .segment { background-color: #ff3333; box-shadow: 0 0 5px #ff3333; }
-        .right-bar .segment { background-color: #33ff33; box-shadow: 0 0 5px #33ff33; }
-
-        /* Odomètre en bas (Style digital rouge) */
-        .odometer {
-            position: absolute;
-            bottom: 12%;
-            font-size: 3.5vw;
-            color: #ff2222;
+        .digital-panel {
+            width: 85%;
+            background-color: #0b0b0b;
+            border: 1px solid #222;
+            border-radius: 4px;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: monospace;
+            color: #dcdcdc;
+            font-size: 14px;
+            text-transform: uppercase;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+        .panel-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .panel-label {
+            font-size: 9px;
+            color: #777;
+            margin-bottom: 2px;
+            letter-spacing: 1px;
+        }
+        .panel-value {
+            font-size: 18px;
+            color: #ff9f0a; /* Orange type de l'image */
             font-weight: bold;
-            text-shadow: 0 0 10px rgba(255, 34, 34, 0.5);
-            background-color: #0d0000;
-            padding: 2px 15px;
-            border: 1px solid #330000;
-            border-radius: 5px;
+        }
+        /* Curseur de test masqué ou discret en bas pour simuler la vitesse */
+        .controls {
+            position: absolute;
+            bottom: 10px;
+            width: 80%;
+            display: flex;
+            justify-content: center;
+            opacity: 0.3;
+            transition: opacity 0.3s;
+        }
+        .controls:hover {
+            opacity: 1;
+        }
+        .controls input {
+            width: 100%;
+            accent-color: #ff9f0a;
         }
     </style>
 </head>
 <body>
 
-    <div class="dashboard">
-        <!-- Arc bleu supérieur -->
-        <div class="gauge-arc"></div>
+<div class="container">
+    <div></div> <!-- Spacer -->
+    
+    <canvas id="speedometer-canvas"></canvas>
 
-        <!-- Jauge latérale gauche (Rouge) -->
-        <div class="side-bar left-bar">
-            <div class="segment"></div><div class="segment"></div><div class="segment"></div>
-            <div class="segment"></div><div class="segment"></div><div class="segment"></div>
+    <div class="digital-panel">
+        <div class="panel-item">
+            <span class="panel-label">OUTSIDE</span>
+            <span class="panel-value" id="temp-val">27°C</span>
         </div>
-
-        <!-- Vitesse centrale -->
-        <div class="center-speed">
-            <div id="speed">0</div>
-            <div id="unit">km/h</div>
+        <div class="panel-item" style="align-items: center;">
+            <span class="panel-label">TRIP B</span>
+            <span class="panel-value" id="trip-val">0.0</span>
         </div>
-
-        <!-- Jauge latérale droite (Verte) -->
-        <div class="side-bar right-bar">
-            <div class="segment"></div><div class="segment"></div><div class="segment"></div>
-            <div class="segment"></div><div class="segment"></div><div class="segment"></div>
+        <div class="panel-item" style="align-items: flex-end;">
+            <span class="panel-label">SPEED km/h</span>
+            <span class="panel-value" id="digital-speed" style="color: #fff;">0</span>
         </div>
-
-        <!-- Compteur kilométrique fictif fixe en bas -->
-        <div class="odometer">8888.8 km</div>
     </div>
 
-    <script>
-        if ("geolocation" in navigator) {
-            navigator.geolocation.watchPosition(
-                (position) => {
-                    const speedMPS = position.coords.speed;
-                    if (speedMPS !== null && speedMPS > 0) {
-                        const speedKMH = Math.round(speedMPS * 3.6);
-                        document.getElementById("speed").innerText = speedKMH;
-                    } else {
-                        document.getElementById("speed").innerText = "0";
-                    }
-                },
-                (error) => { console.error(error); },
-                { enableHighAccuracy: true }
-            );
-        } else {
-            document.getElementById("speed").innerText = "EE";
+    <div class="controls">
+        <input type="range" id="speed-input" min="0" max="260" value="0">
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('speedometer-canvas');
+    const ctx = canvas.getContext('2d');
+    const speedInput = document.getElementById('speed-input');
+    const digitalSpeed = document.getElementById('digital-speed');
+
+    // Configuration des dimensions pour support Retina / Écrans haute densité
+    const size = 350;
+    canvas.width = size * window.devicePixelRatio;
+    canvas.height = size * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+    let currentSpeed = 0;
+    let targetSpeed = 0;
+
+    // Paramètres du cadran (angles en radians)
+    // Le cadran va de 0 à 260 km/h répartis sur un arc de cercle spécifique
+    const startAngle = 0.75 * Math.PI; // Environ à 7h
+    const endAngle = 2.25 * Math.PI;   // Environ à 5h
+    const maxSpeed = 260;
+
+    function speedToAngle(speed) {
+        return startAngle + (speed / maxSpeed) * (endAngle - startAngle);
+    }
+
+    function drawSpeedometer() {
+        ctx.clearRect(0, 0, size, size);
+        
+        const cx = size / 2;
+        const cy = size / 2 + 10;
+        const radius = size * 0.42;
+
+        // 1. Dessin de la graduation circulaire orange externe
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius + 4, startAngle, endAngle);
+        ctx.strokeStyle = 'rgba(255, 111, 0, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // 2. Dessin des graduations (Ticks)
+        const totalTicks = 130; // Nombre total de petites lignes de graduation
+        for (let i = 0; i <= totalTicks; i++) {
+            const speedValue = (i / totalTicks) * maxSpeed;
+            const angle = speedToAngle(speedValue);
+            
+            let tickLength = 6;
+            let isMajor = speedValue % 20 === 0;
+            let isMedium = speedValue % 10 === 0 && !isMajor;
+
+            if (isMajor) {
+                tickLength = 14;
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2.5;
+            } else if (isMedium) {
+                tickLength = 10;
+                ctx.strokeStyle = '#ff8f00';
+                ctx.lineWidth = 1.5;
+            } else {
+                tickLength = 6;
+                ctx.strokeStyle = '#ff6f00';
+                ctx.lineWidth = 1;
+            }
+
+            const xStart = cx + Math.cos(angle) * radius;
+            const yStart = cy + Math.sin(angle) * radius;
+            const xEnd = cx + Math.cos(angle) * (radius - tickLength);
+            const yEnd = cy + Math.sin(angle) * (radius - tickLength);
+
+            ctx.beginPath();
+            ctx.moveTo(xStart, yStart);
+            ctx.lineTo(xEnd, yEnd);
+            ctx.stroke();
+
+            // Dessin des chiffres pour les graduations majeures
+            if (isMajor) {
+                ctx.save();
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 15px -apple-system, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                // Positionnement du texte vers l'intérieur
+                const textRadius = radius - 30;
+                const xText = cx + Math.cos(angle) * textRadius;
+                const yText = cy + Math.sin(angle) * textRadius;
+                
+                ctx.fillText(speedValue.toString(), xText, yText);
+                ctx.restore();
+            }
         }
-    </script>
+
+        // 3. Dessin de l'aiguille (Needle)
+        const needleAngle = speedToAngle(currentSpeed);
+        
+        ctx.save();
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+        
+        // Ligne principale de l'aiguille (Orange vif)
+        ctx.beginPath();
+        ctx.moveTo(cx - Math.cos(needleAngle) * 20, cy - Math.sin(needleAngle) * 20); // Contrepoids arrière
+        ctx.lineTo(cx + Math.cos(needleAngle) * (radius - 12), cy + Math.sin(needleAngle) * (radius - 12));
+        ctx.strokeStyle = '#ff6f00';
+        ctx.lineWidth = 3.5;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        // Centre de l'aiguille (Capuchon noir brillant)
+        ctx.beginPath();
+        ctx.arc(cx, cy, 10, 0, 2 * Math.PI);
+        ctx.fillStyle = '#111111';
+        ctx.fill();
+        ctx.strokeStyle = '#333333';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        
+        ctx.restore();
+    }
+
+    // Animation fluide de l'aiguille
+    function update() {
+        // Amortissement pour une transition naturelle de l'aiguille
+        currentSpeed += (targetSpeed - currentSpeed) * 0.15;
+        if (Math.abs(currentSpeed - targetSpeed) < 0.05) {
+            currentSpeed = targetSpeed;
+        }
+
+        digitalSpeed.textContent = Math.round(currentSpeed);
+        drawSpeedometer();
+        requestAnimationFrame(update);
+    }
+
+    // Changement de vitesse via le slider
+    speedInput.addEventListener('input', (e) => {
+        targetSpeed = parseFloat(e.target.value);
+    });
+
+    // Optionnel : Utilisation de la vraie géolocalisation pour la vitesse réelle en déplacement
+    if ('geolocation' in navigator) {
+        navigator.geolocation.watchPosition((position) => {
+            if (position.coords.speed !== null) {
+                // Convertit m/s en km/h
+                let kmh = position.coords.speed * 3.6;
+                if (kmh < 0) kmh = 0;
+                targetSpeed = Math.min(kmh, maxSpeed);
+                speedInput.value = targetSpeed;
+            }
+        }, (error) => {
+            console.log("Mode simulation actif via le slider inférieur.");
+        }, {
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 5000
+        });
+    }
+
+    // Lancement de l'affichage
+    update();
+</script>
+
 </body>
 </html>
