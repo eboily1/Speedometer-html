@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, orientation=landscape">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Dashboard Racing</title>
+    <style>
+        body {
+            background-color: #050505;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            letter-spacing: 1px;
+        }
+
+        /* Conteneur principal façon cockpit */
+        .dashboard {
+            position: relative;
+            width: 85vw;
+            height: 55vw;
+            max-height: 90vh;
+            border: 4px solid #1a1a1a;
+            border-radius: 30px;
+            background: linear-gradient(135deg, #111, #000);
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Arc de cercle bleu (Tachymètre simulé) */
+        .gauge-arc {
+            position: absolute;
+            top: 10%;
+            width: 55vw;
+            height: 55vw;
+            border: 12px dashed #0099ff;
+            border-bottom: 12px solid transparent;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(0, 153, 255, 0.4);
+            box-sizing: border-box;
+        }
+
+        /* Bloc central de vitesse */
+        .center-speed {
+            text-align: center;
+            z-index: 10;
+        }
+        #speed {
+            font-size: 20vw;
+            font-weight: 900;
+            line-height: 0.9;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(255,255,255,0.6);
+        }
+        #unit {
+            font-size: 3vw;
+            color: #00ffcc;
+            font-weight: bold;
+        }
+
+        /* Barres latérales (Batterie et Température) */
+        .side-bar {
+            position: absolute;
+            bottom: 25%;
+            width: 2.5vw;
+            height: 15vw;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 4px;
+        }
+        .left-bar { left: 10%; }
+        .right-bar { right: 10%; }
+        
+        .segment {
+            flex: 1;
+            border-radius: 2px;
+        }
+        .left-bar .segment { background-color: #ff3333; box-shadow: 0 0 5px #ff3333; }
+        .right-bar .segment { background-color: #33ff33; box-shadow: 0 0 5px #33ff33; }
+
+        /* Odomètre en bas (Style digital rouge) */
+        .odometer {
+            position: absolute;
+            bottom: 12%;
+            font-size: 3.5vw;
+            color: #ff2222;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 34, 34, 0.5);
+            background-color: #0d0000;
+            padding: 2px 15px;
+            border: 1px solid #330000;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <!-- Arc bleu supérieur -->
+        <div class="gauge-arc"></div>
+
+        <!-- Jauge latérale gauche (Rouge) -->
+        <div class="side-bar left-bar">
+            <div class="segment"></div><div class="segment"></div><div class="segment"></div>
+            <div class="segment"></div><div class="segment"></div><div class="segment"></div>
+        </div>
+
+        <!-- Vitesse centrale -->
+        <div class="center-speed">
+            <div id="speed">0</div>
+            <div id="unit">km/h</div>
+        </div>
+
+        <!-- Jauge latérale droite (Verte) -->
+        <div class="side-bar right-bar">
+            <div class="segment"></div><div class="segment"></div><div class="segment"></div>
+            <div class="segment"></div><div class="segment"></div><div class="segment"></div>
+        </div>
+
+        <!-- Compteur kilométrique fictif fixe en bas -->
+        <div class="odometer">8888.8 km</div>
+    </div>
+
+    <script>
+        if ("geolocation" in navigator) {
+            navigator.geolocation.watchPosition(
+                (position) => {
+                    const speedMPS = position.coords.speed;
+                    if (speedMPS !== null && speedMPS > 0) {
+                        const speedKMH = Math.round(speedMPS * 3.6);
+                        document.getElementById("speed").innerText = speedKMH;
+                    } else {
+                        document.getElementById("speed").innerText = "0";
+                    }
+                },
+                (error) => { console.error(error); },
+                { enableHighAccuracy: true }
+            );
+        } else {
+            document.getElementById("speed").innerText = "EE";
+        }
+    </script>
+</body>
+</html>
