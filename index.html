@@ -7,23 +7,19 @@
   <style>
     :root {
       --bg: #000000;
-      --deep-blue: #040b13;
-      --blue-1: #071a2f;
-      --blue-2: #0e5bd4;
-      --blue-3: #34b6ff;
-      --blue-4: rgba(13, 125, 255, 0.9);
-      --panel: rgba(4, 15, 24, 0.8);
-      --panel-border: rgba(26, 143, 255, 0.9);
-      --panel-glow: rgba(15, 146, 255, 0.8);
-      --dial-border: rgba(17, 26, 38, 0.96);
-      --dial-ring: rgba(11, 31, 44, 0.95);
-      --needle: #ff7e1a;
-      --needle-dark: #ff6800;
-      --face: #f1f3f5;
-      --face-shadow: rgba(0,0,0,0.18);
-      --digit: rgba(7, 13, 20, 0.86);
-      --white: #eef6ff;
+      --blue-strong: #0d7dff;
+      --blue-bright: #2db9ff;
+      --blue-glow: rgba(29, 157, 255, 0.9);
+      --panel-bg: rgba(6, 18, 31, 0.82);
+      --panel-border: rgba(38, 146, 255, 0.9);
+      --dial-outer: #050d17;
+      --dial-inner: #eef3f7;
+      --dial-shadow: rgba(15, 120, 255, 0.75);
+      --dark-text: rgba(8, 16, 22, 0.9);
+      --light-text: rgba(228, 240, 255, 0.9);
       --muted: rgba(16, 24, 32, 0.7);
+      --needle: #ff7a1a;
+      --needle-dark: #f15c00;
     }
 
     * {
@@ -47,6 +43,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(19, 118, 255, 0.14), rgba(0,0,0,0) 36%),
+        #000;
     }
 
     .scene {
@@ -64,48 +63,48 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at center, rgba(9, 113, 255, 0.12), rgba(0,0,0,0) 45%);
+      background: radial-gradient(circle at center, rgba(26, 138, 255, 0.18), rgba(0,0,0,0) 42%);
       pointer-events: none;
     }
 
     .panel {
       position: absolute;
       top: 50%;
-      width: 300px;
-      height: 185px;
+      width: 330px;
+      height: 195px;
       transform: translateY(-50%);
-      background: linear-gradient(180deg, rgba(4, 15, 26, 0.9), rgba(7, 18, 30, 0.75));
+      background: linear-gradient(180deg, rgba(3, 17, 28, 0.9), rgba(5, 17, 30, 0.8));
       border: 2px solid var(--panel-border);
       border-radius: 18px;
       box-shadow:
         0 0 0 2px rgba(7, 18, 27, 0.9),
-        inset 0 0 18px rgba(9, 29, 38, 0.7),
-        0 0 24px rgba(13, 120, 255, 0.65);
+        inset 0 0 18px rgba(7, 24, 34, 0.75),
+        0 0 22px rgba(21, 128, 255, 0.6),
+        0 0 50px rgba(21, 128, 255, 0.25);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: flex-start;
-      padding: 24px 24px 18px 26px;
+      padding: 26px 24px 18px 28px;
       z-index: 2;
     }
 
     .panel.left {
-      left: 60px;
+      left: clamp(18px, 4vw, 64px);
     }
 
     .panel.right {
-      right: 60px;
-      align-items: flex-start;
+      right: clamp(18px, 4vw, 64px);
     }
 
     .panel-label {
-      font-size: 12px;
+      font-size: 14px;
       letter-spacing: 0.18em;
       font-weight: 700;
       text-transform: uppercase;
-      color: rgba(228, 240, 255, 0.82);
-      margin-bottom: 18px;
-      padding-left: 2px;
+      color: rgba(228, 240, 255, 0.9);
+      margin-bottom: 16px;
+      padding-left: 4px;
     }
 
     .panel-value {
@@ -119,21 +118,28 @@
     }
 
     .panel-value .big {
-      font-size: clamp(52px, 4vw, 86px);
+      font-size: clamp(58px, 4vw, 104px);
+      font-weight: 300;
+      line-height: 0.8;
     }
 
     .panel-value .unit {
-      font-size: 22px;
+      font-size: 24px;
       letter-spacing: 0.06em;
       color: rgba(228, 240, 255, 0.7);
       margin-left: 10px;
-      margin-bottom: 8px;
-      text-transform: uppercase;
+      margin-bottom: 12px;
+      text-transform: lowercase;
+    }
+
+    .panel.right .panel-value {
+      width: 100%;
+      justify-content: flex-start;
     }
 
     .panel.right .panel-value .big {
-      font-size: clamp(46px, 3.6vw, 78px);
-      letter-spacing: -0.05em;
+      font-size: clamp(52px, 4vw, 96px);
+      letter-spacing: -0.06em;
     }
 
     .dial-wrap {
@@ -152,7 +158,7 @@
       position: absolute;
       inset: 4% 7% 1% 7%;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(29, 153, 255, 0.35), rgba(8, 75, 167, 0.2) 32%, rgba(0,0,0,0) 60%);
+      background: radial-gradient(circle, rgba(29, 153, 255, 0.42), rgba(8, 75, 167, 0.24) 32%, rgba(0,0,0,0) 64%);
       filter: blur(24px);
       transform: scale(1.12);
       pointer-events: none;
@@ -163,33 +169,46 @@
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      background: linear-gradient(180deg, #02070c 0%, #020c14 15%, #030d12 40%, #040d16 100%);
+      background: linear-gradient(180deg, #02070c 0%, #020d17 18%, #030d14 40%, #040d18 100%);
       box-shadow:
-        0 0 0 14px rgba(10, 18, 26, 0.9),
-        0 0 26px rgba(17, 125, 255, 0.9),
-        0 0 60px rgba(20, 130, 255, 0.65),
-        0 0 120px rgba(20, 130, 255, 0.35),
-        inset 0 0 34px rgba(3, 16, 24, 0.9);
+        0 0 0 18px rgba(3, 11, 18, 0.96),
+        0 0 0 22px rgba(13, 22, 31, 0.9),
+        0 0 30px rgba(17, 125, 255, 0.8),
+        0 0 72px rgba(20, 130, 255, 0.64),
+        0 0 120px rgba(20, 130, 255, 0.24),
+        inset 0 0 30px rgba(6, 22, 34, 0.96);
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: visible;
+    }
+
+    .dial::before {
+      content: "";
+      position: absolute;
+      inset: 30px;
+      border-radius: 50%;
+      box-shadow: inset 0 0 0 2px rgba(15, 30, 42, 0.3);
+      pointer-events: none;
     }
 
     .dial-inner {
       position: absolute;
-      inset: 42px;
+      inset: 52px;
       border-radius: 50%;
-      background: linear-gradient(180deg, rgba(255,255,255,1), rgba(223,228,234,1) 100%);
-      box-shadow: inset 0 0 18px rgba(0,0,0,0.18);
+      background: radial-gradient(circle at 50% 34%, rgba(255,255,255,1), rgba(231,236,241,1) 64%, rgba(214,220,228,1) 100%);
+      box-shadow:
+        inset 0 0 20px rgba(0,0,0,0.12),
+        inset 0 0 0 2px rgba(0, 0, 0, 0.02);
       overflow: hidden;
     }
 
     .dial-inner::before {
       content: "";
       position: absolute;
-      inset: 18px;
+      inset: 20px;
       border-radius: 50%;
-      background: radial-gradient(circle at 50% 38%, rgba(255,255,255,0.95), rgba(255,255,255,0) 54%);
+      background: radial-gradient(circle at 50% 34%, rgba(255,255,255,0.9), rgba(255,255,255,0) 58%);
       pointer-events: none;
     }
 
@@ -207,8 +226,8 @@
       left: 50%;
       top: 52%;
       transform: translate(-50%, -50%);
-      width: 54%;
-      height: 54%;
+      width: 55%;
+      height: 55%;
       border-radius: 50%;
       display: flex;
       flex-direction: column;
@@ -221,15 +240,15 @@
     }
 
     .speed-readout {
-      font-size: clamp(84px, 7vw, 140px);
+      font-size: clamp(86px, 7vw, 150px);
       line-height: 0.8;
       letter-spacing: -0.09em;
       font-weight: 300;
-      color: rgba(7, 18, 28, 0.88);
+      color: rgba(7, 18, 28, 0.9);
     }
 
     .kmh {
-      font-size: 26px;
+      font-size: 24px;
       letter-spacing: 0.04em;
       font-weight: 500;
       margin-top: 10px;
@@ -238,7 +257,7 @@
     }
 
     .trip-line {
-      width: 120px;
+      width: 118px;
       height: 4px;
       margin-top: 18px;
       border-radius: 4px;
@@ -247,7 +266,7 @@
 
     .trip-label {
       margin-top: 12px;
-      font-size: 16px;
+      font-size: 15px;
       letter-spacing: 0.28em;
       text-transform: uppercase;
       font-weight: 700;
@@ -261,7 +280,7 @@
       transform: translateX(-50%);
       background: rgba(138, 177, 208, 0.18);
       border-radius: 12px;
-      padding: 8px 20px 10px;
+      padding: 9px 20px 10px;
       font-size: 18px;
       color: rgba(12, 25, 37, 0.84);
       font-weight: 700;
@@ -281,16 +300,21 @@
 
     @media (max-width: 1100px) {
       .panel {
-        width: 240px;
-        height: 160px;
+        width: 260px;
+        height: 170px;
+        padding: 20px 20px 16px 22px;
       }
 
       .panel.left {
-        left: 24px;
+        left: 22px;
       }
 
       .panel.right {
-        right: 24px;
+        right: 22px;
+      }
+
+      .panel-label {
+        font-size: 12px;
       }
     }
 
@@ -300,7 +324,7 @@
       }
 
       .panel {
-        width: 170px;
+        width: 180px;
         height: 120px;
         padding: 16px 14px;
       }
@@ -312,13 +336,13 @@
       }
 
       .panel-value .big {
-        font-size: 32px;
+        font-size: 42px;
       }
 
       .panel-value .unit {
         font-size: 12px;
         margin-left: 6px;
-        margin-bottom: 4px;
+        margin-bottom: 5px;
       }
 
       .dial-wrap {
@@ -371,7 +395,8 @@
     const cx = 300;
     const cy = 300;
     const outerRadius = 260;
-    const innerRadius = 220;
+    const tickRadius = 220;
+    const labelRadius = 156;
     const startAngle = (210 * Math.PI) / 180;
     const endAngle = (330 * Math.PI) / 180;
     const totalTicks = 100;
@@ -392,16 +417,26 @@
       const outerArc = createSVG('path', {
         d: `M ${cx + Math.cos(startAngle) * outerRadius} ${cy + Math.sin(startAngle) * outerRadius} A ${outerRadius} ${outerRadius} 0 0 1 ${cx + Math.cos(endAngle) * outerRadius} ${cy + Math.sin(endAngle) * outerRadius}`,
         fill: 'none',
-        stroke: 'rgba(37, 174, 255, 0.82)',
-        'stroke-width': '2.2',
+        stroke: 'rgba(20, 136, 255, 0.8)',
+        'stroke-width': '2.5',
         'stroke-linecap': 'round'
       });
       svg.appendChild(outerArc);
 
+      const glowArc = createSVG('path', {
+        d: `M ${cx + Math.cos(startAngle) * (outerRadius - 8)} ${cy + Math.sin(startAngle) * (outerRadius - 8)} A ${outerRadius - 8} ${outerRadius - 8} 0 0 1 ${cx + Math.cos(endAngle) * (outerRadius - 8)} ${cy + Math.sin(endAngle) * (outerRadius - 8)}`,
+        fill: 'none',
+        stroke: 'rgba(34, 172, 255, 0.55)',
+        'stroke-width': '1.5',
+        'stroke-linecap': 'round'
+      });
+      svg.appendChild(glowArc);
+
       for (let i = 0; i <= totalTicks; i += 10) {
         const angle = valueToAngle(i);
         const isMajor = i % 20 === 0;
-        const tickLength = isMajor ? 18 : 10;
+        const tickLength = isMajor ? 20 : 11;
+
         const x1 = cx + Math.cos(angle) * outerRadius;
         const y1 = cy + Math.sin(angle) * outerRadius;
         const x2 = cx + Math.cos(angle) * (outerRadius - tickLength);
@@ -409,21 +444,20 @@
 
         const line = createSVG('line', {
           x1, y1, x2, y2,
-          stroke: isMajor ? '#0a2336' : '#0f5eb7',
-          'stroke-width': isMajor ? '2.2' : '1.5',
+          stroke: isMajor ? '#0a2336' : '#114f95',
+          'stroke-width': isMajor ? '2.2' : '1.3',
           'stroke-linecap': 'round'
         });
         svg.appendChild(line);
 
         if (isMajor) {
-          const labelRadius = 148;
           const tx = cx + Math.cos(angle) * labelRadius;
           const ty = cy + Math.sin(angle) * labelRadius;
           const text = createSVG('text', {
             x: tx,
             y: ty,
             fill: '#0b2337',
-            'font-size': 28,
+            'font-size': 30,
             'font-weight': 700,
             'font-family': 'system-ui, sans-serif',
             'text-anchor': 'middle',
@@ -435,12 +469,14 @@
       }
 
       const needleAngle = valueToAngle(0);
-      const needleLeft = cx + Math.cos(needleAngle - Math.PI / 2) * 18;
-      const needleTop = cy + Math.sin(needleAngle - Math.PI / 2) * 18;
-      const needleTip = cx + Math.cos(needleAngle) * 150;
-      const needleTipY = cy + Math.sin(needleAngle) * 150;
-      const needleRight = cx + Math.cos(needleAngle + Math.PI / 2) * 18;
-      const needleBottom = cy + Math.sin(needleAngle + Math.PI / 2) * 18;
+      const needleLen = 140;
+      const needleBase = 18;
+      const needleLeft = cx + Math.cos(needleAngle - Math.PI / 2) * needleBase;
+      const needleTop = cy + Math.sin(needleAngle - Math.PI / 2) * needleBase;
+      const needleTip = cx + Math.cos(needleAngle) * needleLen;
+      const needleTipY = cy + Math.sin(needleAngle) * needleLen;
+      const needleRight = cx + Math.cos(needleAngle + Math.PI / 2) * needleBase;
+      const needleBottom = cy + Math.sin(needleAngle + Math.PI / 2) * needleBase;
 
       const needle = createSVG('path', {
         d: `M ${needleLeft} ${needleTop} L ${needleTip} ${needleTipY} L ${needleRight} ${needleBottom} Z`,
