@@ -2,14 +2,16 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tableau de Bord GPS iPhone</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Tableau de Bord GPS iPhone 7</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Roboto, sans-serif;
+            -webkit-user-select: none; /* Évite les sélections de texte accidentelles sur iPhone */
+            user-select: none;
         }
 
         body {
@@ -18,70 +20,68 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            min-height: -webkit-fill-available; /* Correction hauteur Safari iOS */
             color: #fff;
             overflow: hidden;
         }
 
-        /* Conteneur principal calé sur les proportions de l'image originale */
+        /* Le conteneur épouse désormais 100% de la largeur et de la hauteur visibles de l'iPhone */
         .dashboard-container {
             position: relative;
-            width: 1024px;  
-            height: 576px; 
+            width: 100vw;  
+            height: 100vh; 
+            height: -webkit-fill-available;
             background-image: url('./dashboard.png'); 
-            background-size: cover;
+            background-size: 100% 100%; /* Force l'image à s'étirer parfaitement sur tout l'écran */
             background-position: center;
-            border-radius: 16px;
-            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9);
+            background-repeat: no-repeat;
         }
 
-        /* --- Alignement Vitesse Max (Panneau Gauche) --- */
+        /* --- Alignements fluides basés sur les pourcentages de l'écran mobile --- */
         .vitesse-max-val {
             position: absolute;
             top: 45.5%;
             left: 14.0%; 
             transform: translate(-50%, -50%);
-            font-size: 4.8rem;
+            font-size: 7.5vh; /* Taille proportionnelle à la hauteur de l'écran */
             font-weight: 700;
             color: #ffffff;
             text-shadow: 0 0 15px rgba(255,255,255,0.3);
             text-align: center;
-            width: 180px;
+            width: 18vw;
         }
 
-        /* --- Alignement Horloge (Panneau Droite) --- */
         .horloge-val {
             position: absolute;
             top: 47%;
             right: 14.0%; 
             transform: translate(50%, -50%);
-            font-size: 4.5rem;
+            font-size: 7vh;
             font-weight: 700;
             color: #ffffff;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             text-shadow: 0 0 15px rgba(255,255,255,0.3);
             text-align: center;
-            width: 220px;
+            width: 22vw;
         }
 
-        /* --- Alignement Vitesse Actuelle (Centre) --- */
         .vitesse-actuelle {
             position: absolute;
             top: 41%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 6.8rem;
+            font-size: 11vh;
             font-weight: 700;
             text-shadow: 0 0 25px rgba(0, 153, 255, 0.6);
             z-index: 5;
         }
 
-        /* --- Alignement Kilométrage TRIP : Descendu encore plus bas --- */
         .trip-val {
             position: absolute;
-            bottom: 20.0%; /* Ajusté de 21.2% à 20.0% pour se centrer au milieu de la case */
+            bottom: 20.0%; 
             left: 50%;
             transform: translateX(-50%);
-            font-size: 1.15rem;
+            font-size: 2.2vh;
             font-weight: 700;
             color: #ffffff;
             text-shadow: 0 0 10px rgba(0, 153, 255, 0.8);
@@ -89,13 +89,13 @@
             letter-spacing: 1px;
         }
 
-        /* --- L'Aiguille (Masquée au centre, visible uniquement sur la partie blanche) --- */
+        /* --- L'Aiguille s'adapte dynamiquement au ratio du compteur --- */
         .aiguille-wrapper {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 380px; 
-            height: 380px;
+            width: 66vh; /* Le cadran central dépend uniquement de la hauteur de l'écran */
+            height: 66vh;
             transform: translate(-50%, -50%);
             z-index: 2;
             pointer-events: none;
@@ -104,8 +104,8 @@
         .aiguille {
             position: absolute;
             top: 0;
-            left: calc(50% - 3px);
-            width: 6px;
+            left: calc(50% - 2px);
+            width: 4px;
             height: 100%; 
             transform-origin: center center;
             transform: rotate(-140deg); 
@@ -129,53 +129,82 @@
 
         .gps-status {
             position: absolute;
-            top: 15px;
+            top: 10px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 0.75rem;
+            font-size: 1.5vh;
             letter-spacing: 1px;
             color: #ff3333;
             text-transform: uppercase;
             font-weight: bold;
+            z-index: 10;
         }
         .gps-status.active {
             color: #00ff66;
             text-shadow: 0 0 10px #00ff66;
         }
+
+        /* Message d'alerte si le téléphone est tenu verticalement (Mode Portrait) */
+        .orientation-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #040d21;
+            z-index: 9999;
+            color: white;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-size: 1.2rem;
+            padding: 20px;
+        }
+
+        @media (orientation: portrait) {
+            .orientation-warning {
+                display: flex;
+            }
+            .dashboard-container {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <div class="dashboard-container">
-        <!-- Statut GPS -->
-        <div class="gps-status" id="gps-status">GPS Déconnecté</div>
+    <!-- Alerte pour l'iPhone -->
+    <div class="orientation-warning">
+        <p style="font-size: 2rem; margin-bottom: 10px;">🔄</p>
+        <p>Veuillez tourner votre iPhone en <b>mode paysage</b> pour afficher le tableau de bord.</p>
+    </div>
 
-        <!-- Panneau Gauche -->
+    <div class="dashboard-container">
+        <div class="gps-status" id="gps-status">GPS Déconnecté</div>
         <div class="vitesse-max-val" id="max-speed">0</div>
 
-        <!-- Compteur Central -->
         <div class="aiguille-wrapper">
             <div class="aiguille" id="needle"></div>
         </div>
         <div class="vitesse-actuelle" id="current-speed">0</div>
         <div class="trip-val" id="odometer">0.0 km</div>
 
-        <!-- Panneau Droite -->
         <div class="horloge-val" id="clock">00:00</div>
     </div>
 
     <script>
-        // --- 1. Gestion de l'Horloge ---
+        // --- Horloge ---
         function updateClock() {
             const now = new Date();
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            document.getElementById('clock').innerText = `${hours}:${minutes}`;
+            document.getElementById('clock').innerText = 
+                `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
         }
         setInterval(updateClock, 1000);
         updateClock();
 
-        // --- 2. Variables de calcul et éléments du DOM ---
+        // --- GPS Logic ---
         const speedEl = document.getElementById('current-speed');
         const maxSpeedEl = document.getElementById('max-speed');
         const needle = document.getElementById('needle');
@@ -186,17 +215,12 @@
         let totalDistance = 0.0;
         let lastPosition = null;
 
-        // --- 3. Intégration du GPS Réel ---
         if ("geolocation" in navigator) {
-            const geoOptions = {
+            navigator.geolocation.watchPosition(updateGPSData, handleGPSError, {
                 enableHighAccuracy: true, 
                 maximumAge: 0,            
                 timeout: 5000             
-            };
-
-            navigator.geolocation.watchPosition(updateGPSData, handleGPSError, geoOptions);
-        } else {
-            gpsStatusEl.innerText = "GPS non supporté";
+            });
         }
 
         function updateGPSData(position) {
@@ -222,11 +246,10 @@
             needle.style.transform = `rotate(${angle}deg)`;
 
             if (lastPosition) {
-                const distanceIncrement = calculateDistance(
+                totalDistance += calculateDistance(
                     lastPosition.coords.latitude, lastPosition.coords.longitude,
                     position.coords.latitude, position.coords.longitude
                 );
-                totalDistance += distanceIncrement;
                 odometerEl.innerText = `${totalDistance.toFixed(1)} km`;
             }
             lastPosition = position;
@@ -234,17 +257,7 @@
 
         function handleGPSError(error) {
             gpsStatusEl.classList.remove('active');
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    gpsStatusEl.innerText = "Autorisez l'accès GPS";
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    gpsStatusEl.innerText = "Signal GPS perdu";
-                    break;
-                case error.TIMEOUT:
-                    gpsStatusEl.innerText = "Recherche de signal...";
-                    break;
-            }
+            gpsStatusEl.innerText = "Signal GPS faible...";
         }
 
         function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -254,8 +267,7 @@
             const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
                       Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
                       Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
         }
     </script>
 </body>
