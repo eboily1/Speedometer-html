@@ -7,31 +7,23 @@
   <style>
     :root {
       --bg: #000000;
-      --panel-bg: rgba(5, 18, 30, 0.9);
-      --panel-border: rgba(32, 145, 255, 0.95);
-      --panel-glow: rgba(30, 146, 255, 0.7);
-      --dial-outer: #020a12;
-      --dial-dark: rgba(5, 15, 23, 0.96);
-      --dial-face: #edf2f7;
-      --label-dark: rgba(8, 18, 27, 0.9);
-      --muted-dark: rgba(13, 26, 36, 0.72);
-      --blue-glow: rgba(16, 136, 255, 0.55);
-      --blue-primary: #1e95ff;
-      --blue-bright: #56c4ff;
-      --needle: #2ca0ff;
-      --needle-deep: #0b7adf;
-      --text-light: rgba(230, 240, 255, 0.92);
-      --trip-bg: rgba(120, 168, 207, 0.16);
+      --panel-bg: rgba(6, 18, 31, 0.84);
+      --panel-border: rgba(40, 146, 255, 0.92);
+      --glow: rgba(24, 145, 255, 0.84);
+      --dial-outside: #050d15;
+      --dial-mid: #081b28;
+      --dial-inner: #edf2f7;
+      --digit: rgba(8, 18, 27, 0.9);
+      --muted: rgba(17, 27, 36, 0.8);
+      --blue: #1d9bff;
+      --blue-soft: #60d6ff;
+      --needle: #1f9dff;
+      --needle-deep: #0d7eea;
+      --panel-text: rgba(228, 240, 255, 0.9);
+      --trip-bg: rgba(143, 176, 208, 0.18);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-user-select: none;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
       width: 100%;
@@ -63,7 +55,7 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at center, rgba(17, 115, 255, 0.14), rgba(0,0,0,0) 42%);
+      background: radial-gradient(circle at center, rgba(19, 116, 255, 0.16), rgba(0,0,0,0) 38%);
       pointer-events: none;
     }
 
@@ -73,38 +65,33 @@
       width: 330px;
       height: 190px;
       transform: translateY(-50%);
-      background: linear-gradient(180deg, rgba(5, 17, 28, 0.9), rgba(5, 16, 28, 0.8));
+      background: linear-gradient(180deg, rgba(5, 17, 29, 0.88), rgba(4, 15, 26, 0.78));
       border: 2px solid var(--panel-border);
       border-radius: 18px;
       box-shadow:
-        0 0 0 2px rgba(7, 18, 27, 0.9),
-        inset 0 0 18px rgba(8, 23, 35, 0.78),
-        0 0 22px rgba(20, 126, 255, 0.6),
-        0 0 50px rgba(20, 126, 255, 0.12);
+        0 0 0 2px rgba(5, 15, 24, 0.9),
+        inset 0 0 18px rgba(8, 22, 34, 0.8),
+        0 0 22px rgba(18, 130, 255, 0.8),
+        0 0 42px rgba(18, 130, 255, 0.18);
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: flex-start;
-      padding: 22px 24px 18px 28px;
+      padding: 24px 24px 18px 28px;
       z-index: 2;
     }
 
-    .panel.left {
-      left: 52px;
-    }
-
-    .panel.right {
-      right: 52px;
-    }
+    .panel.left { left: 50px; }
+    .panel.right { right: 50px; }
 
     .panel-label {
       font-size: 15px;
       letter-spacing: 0.18em;
-      text-transform: uppercase;
       font-weight: 700;
-      color: rgba(231, 242, 255, 0.9);
-      margin-bottom: 18px;
-      padding-left: 4px;
+      text-transform: uppercase;
+      color: rgba(233, 242, 255, 0.92);
+      margin-bottom: 20px;
+      padding-left: 6px;
     }
 
     .panel-value {
@@ -117,7 +104,7 @@
     }
 
     .panel-value .big {
-      font-size: clamp(58px, 3.9vw, 100px);
+      font-size: clamp(56px, 4vw, 108px);
       font-weight: 300;
     }
 
@@ -126,21 +113,21 @@
       letter-spacing: 0.06em;
       color: rgba(228, 240, 255, 0.72);
       margin-left: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 11px;
       text-transform: lowercase;
     }
 
-    .right-value {
+    .panel.right .panel-value {
       width: 100%;
       justify-content: flex-start;
     }
 
     .dial-wrap {
       position: relative;
-      width: min(76vw, 820px);
-      height: min(76vw, 820px);
-      max-width: 820px;
-      max-height: 820px;
+      width: min(75vw, 790px);
+      height: min(75vw, 790px);
+      max-width: 790px;
+      max-height: 790px;
       z-index: 1;
       display: flex;
       align-items: center;
@@ -149,11 +136,11 @@
 
     .dial-glow {
       position: absolute;
-      inset: 6% 8% 2% 8%;
+      inset: 5% 8% 2% 8%;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(36, 155, 255, 0.42), rgba(11, 83, 176, 0.22) 32%, rgba(0,0,0,0) 66%);
-      filter: blur(22px);
-      transform: scale(1.08);
+      background: radial-gradient(circle, rgba(32, 154, 255, 0.48), rgba(14, 87, 184, 0.18) 34%, rgba(0,0,0,0) 68%);
+      filter: blur(28px);
+      transform: scale(1.12);
       pointer-events: none;
     }
 
@@ -162,14 +149,14 @@
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      background: linear-gradient(180deg, #02070c 0%, #020c14 16%, #030d15 40%, #050d19 100%);
+      background: linear-gradient(180deg, #02080d 0%, #020e18 16%, #030d15 42%, #050d18 100%);
       box-shadow:
-        0 0 0 18px rgba(8, 17, 24, 0.96),
-        0 0 0 22px rgba(11, 20, 28, 0.94),
-        0 0 26px rgba(17, 125, 255, 0.8),
-        0 0 72px rgba(20, 130, 255, 0.6),
-        0 0 120px rgba(20, 130, 255, 0.32),
-        inset 0 0 28px rgba(0, 0, 0, 0.7);
+        0 0 0 18px rgba(6, 17, 25, 0.96),
+        0 0 0 22px rgba(9, 20, 28, 0.94),
+        0 0 28px rgba(21, 127, 255, 0.8),
+        0 0 72px rgba(21, 127, 255, 0.62),
+        0 0 120px rgba(21, 127, 255, 0.28),
+        inset 0 0 30px rgba(0, 0, 0, 0.78);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -178,17 +165,17 @@
     .dial::before {
       content: "";
       position: absolute;
-      inset: 18px;
+      inset: 14px;
       border-radius: 50%;
-      border: 1px solid rgba(18, 36, 47, 0.6);
+      border: 1px solid rgba(17, 35, 48, 0.52);
       pointer-events: none;
     }
 
     .dial-inner {
       position: absolute;
-      inset: 56px;
+      inset: 54px;
       border-radius: 50%;
-      background: radial-gradient(circle at 50% 32%, rgba(255,255,255,1), rgba(234,238,243,1) 58%, rgba(219,226,233,1) 100%);
+      background: radial-gradient(circle at 50% 30%, rgba(255,255,255,1), rgba(235,239,244,1) 58%, rgba(220,226,232,1) 100%);
       box-shadow: inset 0 0 18px rgba(0,0,0,0.12);
       overflow: hidden;
     }
@@ -196,9 +183,9 @@
     .dial-inner::before {
       content: "";
       position: absolute;
-      inset: 18px;
+      inset: 20px;
       border-radius: 50%;
-      background: radial-gradient(circle at 50% 34%, rgba(255,255,255,0.9), rgba(255,255,255,0) 56%);
+      background: radial-gradient(circle at 50% 33%, rgba(255,255,255,0.9), rgba(255,255,255,0) 58%);
       pointer-events: none;
     }
 
@@ -228,11 +215,11 @@
     }
 
     .speed-readout {
-      font-size: clamp(88px, 7.2vw, 154px);
+      font-size: clamp(88px, 7.2vw, 158px);
       line-height: 0.8;
       letter-spacing: -0.1em;
       font-weight: 300;
-      color: rgba(10, 18, 28, 0.9);
+      color: rgba(11, 19, 27, 0.9);
     }
 
     .kmh {
@@ -240,15 +227,15 @@
       font-size: 26px;
       letter-spacing: 0.04em;
       font-weight: 500;
-      color: rgba(17, 25, 33, 0.7);
+      color: rgba(18, 24, 31, 0.72);
     }
 
     .trip-line {
-      width: 122px;
+      width: 124px;
       height: 4px;
       margin-top: 18px;
       border-radius: 4px;
-      background: rgba(18, 32, 41, 0.76);
+      background: rgba(17, 31, 41, 0.74);
     }
 
     .trip-label {
@@ -257,17 +244,17 @@
       letter-spacing: 0.28em;
       text-transform: uppercase;
       font-weight: 700;
-      color: rgba(12, 20, 29, 0.82);
+      color: rgba(12, 20, 29, 0.8);
     }
 
     .trip-box {
       position: absolute;
       left: 50%;
-      bottom: 32px;
+      bottom: 28px;
       transform: translateX(-50%);
-      background: rgba(130, 170, 209, 0.18);
+      background: rgba(132, 171, 207, 0.2);
       border-radius: 12px;
-      padding: 9px 20px 11px;
+      padding: 10px 20px 11px;
       font-size: 18px;
       color: rgba(12, 25, 37, 0.84);
       font-weight: 700;
@@ -286,33 +273,19 @@
     }
 
     @media (max-width: 1100px) {
-      .panel {
-        width: 260px;
-        height: 170px;
-      }
-      .panel.left { left: 28px; }
-      .panel.right { right: 28px; }
+      .panel { width: 260px; height: 170px; }
+      .panel.left { left: 22px; }
+      .panel.right { right: 22px; }
       .panel-label { font-size: 12px; }
       .panel-value .big { font-size: 54px; }
     }
 
     @media (max-width: 760px) {
-      .panel {
-        width: 180px;
-        height: 120px;
-        padding: 16px 14px;
-      }
-      .panel-label {
-        font-size: 9px;
-        letter-spacing: 0.12em;
-        margin-bottom: 8px;
-      }
-      .panel-value .big { font-size: 42px; }
+      .panel { width: 180px; height: 120px; padding: 14px 14px; }
+      .panel-label { font-size: 9px; letter-spacing: 0.12em; margin-bottom: 8px; }
+      .panel-value .big { font-size: 40px; }
       .panel-value .unit { font-size: 11px; margin-left: 6px; margin-bottom: 4px; }
-      .dial-wrap {
-        width: 92vw;
-        height: 92vw;
-      }
+      .dial-wrap { width: 92vw; height: 92vw; }
     }
   </style>
 </head>
@@ -343,7 +316,7 @@
 
     <div class="panel right">
       <div class="panel-label">HEURE</div>
-      <div class="panel-value right-value">
+      <div class="panel-value">
         <span class="big">12:40</span>
       </div>
     </div>
@@ -376,14 +349,22 @@
     function drawGauge() {
       svg.innerHTML = '';
 
-      const outerArc = createSVG('path', {
+      const defs = createSVG('defs');
+      const grad = createSVG('linearGradient', { id: 'needleGrad', x1: '0%', y1: '0%', x2: '100%', y2: '0%' });
+      const stop1 = createSVG('stop', { offset: '0%', 'stop-color': '#8fe1ff' });
+      const stop2 = createSVG('stop', { offset: '40%', 'stop-color': '#32b6ff' });
+      const stop3 = createSVG('stop', { offset: '100%', 'stop-color': '#0d7be9' });
+      grad.appendChild(stop1); grad.appendChild(stop2); grad.appendChild(stop3); defs.appendChild(grad);
+      svg.appendChild(defs);
+
+      const arc = createSVG('path', {
         d: `M ${cx + Math.cos(startAngle) * outerRadius} ${cy + Math.sin(startAngle) * outerRadius} A ${outerRadius} ${outerRadius} 0 0 1 ${cx + Math.cos(endAngle) * outerRadius} ${cy + Math.sin(endAngle) * outerRadius}`,
         fill: 'none',
-        stroke: 'rgba(34, 154, 255, 0.85)',
-        'stroke-width': '2.4',
+        stroke: 'rgba(23, 143, 255, 0.86)',
+        'stroke-width': '2.6',
         'stroke-linecap': 'round'
       });
-      svg.appendChild(outerArc);
+      svg.appendChild(arc);
 
       for (let i = 0; i <= totalTicks; i += 10) {
         const angle = valueToAngle(i);
@@ -397,16 +378,16 @@
 
         const line = createSVG('line', {
           x1, y1, x2, y2,
-          stroke: isMajor ? '#0a2336' : '#0f58bc',
-          'stroke-width': isMajor ? '2.2' : '1.4',
+          stroke: isMajor ? '#0a2336' : '#0f5cb8',
+          'stroke-width': isMajor ? '2.2' : '1.2',
           'stroke-linecap': 'round'
         });
         svg.appendChild(line);
 
         if (isMajor) {
-          const radius = 152;
-          const tx = cx + Math.cos(angle) * radius;
-          const ty = cy + Math.sin(angle) * radius;
+          const labelRadius = 156;
+          const tx = cx + Math.cos(angle) * labelRadius;
+          const ty = cy + Math.sin(angle) * labelRadius;
           const text = createSVG('text', {
             x: tx,
             y: ty,
@@ -423,7 +404,7 @@
       }
 
       const needleAngle = valueToAngle(0);
-      const needleLength = 148;
+      const needleLength = 150;
       const needleHalf = 18;
       const left = cx + Math.cos(needleAngle - Math.PI / 2) * needleHalf;
       const top = cy + Math.sin(needleAngle - Math.PI / 2) * needleHalf;
@@ -434,7 +415,7 @@
 
       const needle = createSVG('path', {
         d: `M ${left} ${top} L ${tipX} ${tipY} L ${right} ${bottom} Z`,
-        fill: '#2ea8ff',
+        fill: 'url(#needleGrad)',
         opacity: '1'
       });
       svg.appendChild(needle);
@@ -444,7 +425,7 @@
         cy,
         r: 12,
         fill: '#111111',
-        stroke: '#2a2a2a',
+        stroke: '#2b2b2b',
         'stroke-width': '1.5'
       });
       svg.appendChild(cap);
