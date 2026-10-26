@@ -1,282 +1,478 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Speedometer Pro</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        body, html {
-            width: 100%;
-            height: 100%;
-            background-color: #000000;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .container {
-            width: 100%;
-            max-width: 375px; /* iPhone 7 Width */
-            height: 100%;
-            max-height: 667px; /* iPhone 7 Height */
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            padding: 40px 20px;
-        }
-        #speedometer-canvas {
-            width: 100%;
-            height: auto;
-            aspect-ratio: 1;
-        }
-        .digital-panel {
-            width: 85%;
-            background-color: #0b0b0b;
-            border: 1px solid #222;
-            border-radius: 4px;
-            padding: 10px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: monospace;
-            color: #dcdcdc;
-            font-size: 14px;
-            text-transform: uppercase;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
-        }
-        .panel-item {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        .panel-label {
-            font-size: 9px;
-            color: #777;
-            margin-bottom: 2px;
-            letter-spacing: 1px;
-        }
-        .panel-value {
-            font-size: 18px;
-            color: #ff9f0a; /* Orange type de l'image */
-            font-weight: bold;
-        }
-        /* Curseur de test masqué ou discret en bas pour simuler la vitesse */
-        .controls {
-            position: absolute;
-            bottom: 10px;
-            width: 80%;
-            display: flex;
-            justify-content: center;
-            opacity: 0.3;
-            transition: opacity 0.3s;
-        }
-        .controls:hover {
-            opacity: 1;
-        }
-        .controls input {
-            width: 100%;
-            accent-color: #ff9f0a;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Speedometer Pro</title>
+  <style>
+    :root {
+      --bg: #000000;
+      --panel-bg: rgba(6, 17, 29, 0.82);
+      --panel-border: rgba(36, 145, 255, 0.9);
+      --panel-shadow: rgba(20, 162, 255, 0.72);
+      --dial-outer: rgba(10, 21, 31, 0.96);
+      --dial-inner: #edf2f7;
+      --dial-glow: rgba(35, 136, 255, 0.9);
+      --dial-glow-soft: rgba(35, 136, 255, 0.35);
+      --label: #bac8d9;
+      --digit: #ecf5ff;
+      --orange: #ff8b1f;
+      --orange-soft: rgba(255, 128, 0, 0.7);
+      --dark-text: #0f1724;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dashboard {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      isolation: isolate;
+    }
+
+    .dashboard::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(0, 128, 255, 0.12), transparent 52%);
+      z-index: 0;
+    }
+
+    .dashboard::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(10, 34, 58, 0.15), transparent 65%);
+      z-index: 0;
+    }
+
+    .panel {
+      position: absolute;
+      z-index: 2;
+      width: 270px;
+      height: 175px;
+      border-radius: 18px;
+      background: var(--panel-bg);
+      border: 2px solid var(--panel-border);
+      box-shadow:
+        0 0 0 2px rgba(10, 20, 40, 0.6),
+        0 0 18px var(--panel-shadow),
+        inset 0 0 18px rgba(7, 28, 39, 0.9);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 24px 26px 18px;
+      color: var(--digit);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .panel-left {
+      left: 74px;
+      top: 318px;
+    }
+
+    .panel-right {
+      right: 74px;
+      top: 318px;
+    }
+
+    .panel-label {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #d8e7ff;
+      opacity: 0.9;
+      text-align: center;
+    }
+
+    .panel-value {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 700;
+      line-height: 1;
+      margin-top: 12px;
+      color: var(--digit);
+    }
+
+    .panel-value .number {
+      font-size: 60px;
+      font-weight: 300;
+      letter-spacing: -0.06em;
+      color: #f1f7ff;
+    }
+
+    .panel-value .unit {
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      color: #dfeaf7;
+      opacity: 0.9;
+      transform: translateY(-12px);
+    }
+
+    .panel-right .panel-value .number {
+      font-size: 52px;
+      letter-spacing: -0.05em;
+      font-weight: 300;
+    }
+
+    .dial-wrap {
+      position: relative;
+      width: min(78vw, 820px);
+      height: min(78vw, 820px);
+      max-width: 820px;
+      max-height: 820px;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dial-wrap::before {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(27, 150, 255, 0.35) 0%, rgba(13, 92, 179, 0.16) 25%, rgba(0,0,0,0) 62%);
+      filter: blur(18px);
+      transform: scale(1.2);
+      z-index: 0;
+    }
+
+    .dial {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(11, 32, 48, 0.95), rgba(0, 0, 0, 0.98) 38%, rgba(10, 31, 47, 0.95));
+      border: 18px solid rgba(5, 17, 30, 0.95);
+      box-shadow:
+        0 0 26px rgba(25, 155, 255, 0.9),
+        0 0 44px rgba(17, 130, 255, 0.7),
+        0 0 90px rgba(17, 130, 255, 0.34),
+        inset 0 0 20px rgba(7, 26, 40, 0.92),
+        inset 0 0 40px rgba(2, 9, 18, 0.96);
+      z-index: 1;
+    }
+
+    .dial-face {
+      position: absolute;
+      inset: 52px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.98), rgba(230, 233, 237, 1) 26%, rgba(212, 216, 220, 1) 70%, rgba(198, 202, 208, 1) 100%);
+      box-shadow: inset 0 0 12px rgba(0,0,0,0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dial-face::before {
+      content: "";
+      position: absolute;
+      inset: 16px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 35%, rgba(255,255,255,0.85), rgba(0,0,0,0) 60%);
+      pointer-events: none;
+    }
+
+    #dial-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .center-display {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 58%;
+      height: 58%;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #0b1d35;
+      z-index: 4;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .speed-value {
+      font-size: clamp(72px, 7vw, 124px);
+      line-height: 0.9;
+      font-weight: 300;
+      letter-spacing: -0.08em;
+      color: rgba(12, 24, 35, 0.8);
+      text-shadow: 0 0 1px rgba(0,0,0,0.08);
+    }
+
+    .unit-label {
+      margin-top: 10px;
+      font-size: 22px;
+      letter-spacing: 0.08em;
+      color: rgba(18, 30, 44, 0.7);
+      text-transform: none;
+      font-weight: 500;
+    }
+
+    .trip-line {
+      width: 120px;
+      height: 4px;
+      margin-top: 12px;
+      border-radius: 4px;
+      background: rgba(17, 39, 59, 0.8);
+      opacity: 0.8;
+    }
+
+    .trip-label {
+      margin-top: 10px;
+      font-size: 16px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: rgba(12, 24, 35, 0.82);
+    }
+
+    .trip-box {
+      position: absolute;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%);
+      z-index: 5;
+      padding: 6px 20px 8px;
+      border-radius: 10px;
+      background: rgba(135, 170, 200, 0.18);
+      box-shadow: inset 0 0 12px rgba(130, 147, 170, 0.25);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: rgba(10, 21, 33, 0.8);
+      text-transform: none;
+      pointer-events: none;
+    }
+
+    .needle {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: transparent;
+      z-index: 6;
+      pointer-events: none;
+    }
+
+    input[type="range"] {
+      position: absolute;
+      left: -9999px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @media (max-width: 980px) {
+      .panel {
+        width: 220px;
+        height: 150px;
+      }
+
+      .panel-left {
+        left: 24px;
+      }
+
+      .panel-right {
+        right: 24px;
+      }
+    }
+  </style>
 </head>
 <body>
-
-<div class="container">
-    <div></div> <!-- Spacer -->
-    
-    <canvas id="speedometer-canvas"></canvas>
-
-    <div class="digital-panel">
-        <div class="panel-item">
-            <span class="panel-label">OUTSIDE</span>
-            <span class="panel-value" id="temp-val">27°C</span>
-        </div>
-        <div class="panel-item" style="align-items: center;">
-            <span class="panel-label">TRIP B</span>
-            <span class="panel-value" id="trip-val">0.0</span>
-        </div>
-        <div class="panel-item" style="align-items: flex-end;">
-            <span class="panel-label">SPEED km/h</span>
-            <span class="panel-value" id="digital-speed" style="color: #fff;">0</span>
-        </div>
+  <div class="dashboard">
+    <div class="panel panel-left">
+      <div class="panel-label">VITESSE MAX</div>
+      <div class="panel-value">
+        <span class="number" id="max-speed">129</span>
+        <span class="unit">km/h</span>
+      </div>
     </div>
 
-    <div class="controls">
-        <input type="range" id="speed-input" min="0" max="260" value="0">
+    <div class="dial-wrap">
+      <div class="dial">
+        <div class="dial-face">
+          <svg id="dial-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" aria-label="Speedometer"></svg>
+          <div class="center-display">
+            <div class="speed-value" id="speed-value">0</div>
+            <div class="unit-label">km/h</div>
+            <div class="trip-line"></div>
+            <div class="trip-label">TRIP</div>
+          </div>
+          <div class="trip-box">0.0 km</div>
+        </div>
+      </div>
     </div>
-</div>
 
-<script>
-    const canvas = document.getElementById('speedometer-canvas');
-    const ctx = canvas.getContext('2d');
+    <div class="panel panel-right">
+      <div class="panel-label">HEURE</div>
+      <div class="panel-value">
+        <span class="number" id="hour-value">12:40</span>
+      </div>
+    </div>
+
+    <input id="speed-input" type="range" min="0" max="100" value="0" />
+  </div>
+
+  <script>
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.getElementById('dial-svg');
+    const speedValue = document.getElementById('speed-value');
     const speedInput = document.getElementById('speed-input');
-    const digitalSpeed = document.getElementById('digital-speed');
-
-    // Configuration des dimensions pour support Retina / Écrans haute densité
-    const size = 350;
-    canvas.width = size * window.devicePixelRatio;
-    canvas.height = size * window.devicePixelRatio;
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-
+    const maxSpeed = 100;
+    const startAngle = (210 * Math.PI) / 180;
+    const endAngle = (330 * Math.PI) / 180;
     let currentSpeed = 0;
     let targetSpeed = 0;
 
-    // Paramètres du cadran (angles en radians)
-    // Le cadran va de 0 à 260 km/h répartis sur un arc de cercle spécifique
-    const startAngle = 0.75 * Math.PI; // Environ à 7h
-    const endAngle = 2.25 * Math.PI;   // Environ à 5h
-    const maxSpeed = 260;
-
-    function speedToAngle(speed) {
-        return startAngle + (speed / maxSpeed) * (endAngle - startAngle);
+    function createSvgEl(tag, attrs = {}) {
+      const el = document.createElementNS(svgNS, tag);
+      Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
+      return el;
     }
 
-    function drawSpeedometer() {
-        ctx.clearRect(0, 0, size, size);
-        
-        const cx = size / 2;
-        const cy = size / 2 + 10;
-        const radius = size * 0.42;
+    function valueToAngle(value) {
+      return startAngle + (value / maxSpeed) * (endAngle - startAngle);
+    }
 
-        // 1. Dessin de la graduation circulaire orange externe
-        ctx.beginPath();
-        ctx.arc(cx, cy, radius + 4, startAngle, endAngle);
-        ctx.strokeStyle = 'rgba(255, 111, 0, 0.4)';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
+    function drawDial() {
+      svg.innerHTML = '';
 
-        // 2. Dessin des graduations (Ticks)
-        const totalTicks = 130; // Nombre total de petites lignes de graduation
-        for (let i = 0; i <= totalTicks; i++) {
-            const speedValue = (i / totalTicks) * maxSpeed;
-            const angle = speedToAngle(speedValue);
-            
-            let tickLength = 6;
-            let isMajor = speedValue % 20 === 0;
-            let isMedium = speedValue % 10 === 0 && !isMajor;
+      const cx = 50;
+      const cy = 50;
+      const outerRadius = 42;
+      const innerRadius = 35;
 
-            if (isMajor) {
-                tickLength = 14;
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 2.5;
-            } else if (isMedium) {
-                tickLength = 10;
-                ctx.strokeStyle = '#ff8f00';
-                ctx.lineWidth = 1.5;
-            } else {
-                tickLength = 6;
-                ctx.strokeStyle = '#ff6f00';
-                ctx.lineWidth = 1;
-            }
+      const glowArc = createSvgEl('path', {
+        d: `M ${cx + Math.cos(startAngle) * outerRadius} ${cy + Math.sin(startAngle) * outerRadius} A ${outerRadius} ${outerRadius} 0 0 1 ${cx + Math.cos(endAngle) * outerRadius} ${cy + Math.sin(endAngle) * outerRadius}`,
+        fill: 'none',
+        stroke: 'rgba(28, 148, 255, 0.82)',
+        'stroke-width': '1.2',
+        'stroke-linecap': 'round',
+      });
+      svg.appendChild(glowArc);
 
-            const xStart = cx + Math.cos(angle) * radius;
-            const yStart = cy + Math.sin(angle) * radius;
-            const xEnd = cx + Math.cos(angle) * (radius - tickLength);
-            const yEnd = cy + Math.sin(angle) * (radius - tickLength);
+      for (let value = 0; value <= maxSpeed; value += 10) {
+        const angle = valueToAngle(value);
+        const isMajor = value % 50 === 0;
+        const lineLength = isMajor ? 7.2 : 5.4;
+        const lineColor = isMajor ? '#0a2339' : '#0d5ea5';
 
-            ctx.beginPath();
-            ctx.moveTo(xStart, yStart);
-            ctx.lineTo(xEnd, yEnd);
-            ctx.stroke();
+        const p1x = cx + Math.cos(angle) * innerRadius;
+        const p1y = cy + Math.sin(angle) * innerRadius;
+        const p2x = cx + Math.cos(angle) * (innerRadius - lineLength);
+        const p2y = cy + Math.sin(angle) * (innerRadius - lineLength);
 
-            // Dessin des chiffres pour les graduations majeures
-            if (isMajor) {
-                ctx.save();
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 15px -apple-system, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                
-                // Positionnement du texte vers l'intérieur
-                const textRadius = radius - 30;
-                const xText = cx + Math.cos(angle) * textRadius;
-                const yText = cy + Math.sin(angle) * textRadius;
-                
-                ctx.fillText(speedValue.toString(), xText, yText);
-                ctx.restore();
-            }
+        const line = createSvgEl('line', {
+          x1: p1x,
+          y1: p1y,
+          x2: p2x,
+          y2: p2y,
+          stroke: lineColor,
+          'stroke-width': isMajor ? '1.05' : '0.8',
+          'stroke-linecap': 'round',
+        });
+        svg.appendChild(line);
+
+        if (isMajor) {
+          const textRadius = 25.2;
+          const tx = cx + Math.cos(angle) * textRadius;
+          const ty = cy + Math.sin(angle) * textRadius;
+          const label = createSvgEl('text', {
+            x: tx,
+            y: ty,
+            fill: '#0d2334',
+            'font-size': '7.5',
+            'font-weight': '700',
+            'text-anchor': 'middle',
+            'dominant-baseline': 'middle',
+            'font-family': 'system-ui, sans-serif',
+          });
+          label.textContent = String(value);
+          svg.appendChild(label);
         }
+      }
 
-        // 3. Dessin de l'aiguille (Needle)
-        const needleAngle = speedToAngle(currentSpeed);
-        
-        ctx.save();
-        ctx.shadowBlur = 4;
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-        
-        // Ligne principale de l'aiguille (Orange vif)
-        ctx.beginPath();
-        ctx.moveTo(cx - Math.cos(needleAngle) * 20, cy - Math.sin(needleAngle) * 20); // Contrepoids arrière
-        ctx.lineTo(cx + Math.cos(needleAngle) * (radius - 12), cy + Math.sin(needleAngle) * (radius - 12));
-        ctx.strokeStyle = '#ff6f00';
-        ctx.lineWidth = 3.5;
-        ctx.lineCap = 'round';
-        ctx.stroke();
+      const needleAngle = valueToAngle(currentSpeed);
+      const needleLength = 32;
+      const tipX = cx + Math.cos(needleAngle) * needleLength;
+      const tipY = cy + Math.sin(needleAngle) * needleLength;
+      const baseX = cx + Math.cos(needleAngle - Math.PI * 0.055) * 7.5;
+      const baseY = cy + Math.sin(needleAngle - Math.PI * 0.055) * 7.5;
+      const backX = cx + Math.cos(needleAngle + Math.PI * 0.055) * 7.5;
+      const backY = cy + Math.sin(needleAngle + Math.PI * 0.055) * 7.5;
 
-        // Centre de l'aiguille (Capuchon noir brillant)
-        ctx.beginPath();
-        ctx.arc(cx, cy, 10, 0, 2 * Math.PI);
-        ctx.fillStyle = '#111111';
-        ctx.fill();
-        ctx.strokeStyle = '#333333';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        
-        ctx.restore();
+      const needle = createSvgEl('path', {
+        d: `M ${baseX} ${baseY} L ${tipX} ${tipY} L ${backX} ${backY} Z`,
+        fill: '#ff7c10',
+        opacity: '0.94',
+      });
+      svg.appendChild(needle);
+
+      const cap = createSvgEl('circle', {
+        cx,
+        cy,
+        r: '4.8',
+        fill: '#111111',
+        stroke: '#2d2d2d',
+        'stroke-width': '0.8',
+      });
+      svg.appendChild(cap);
     }
 
-    // Animation fluide de l'aiguille
-    function update() {
-        // Amortissement pour une transition naturelle de l'aiguille
-        currentSpeed += (targetSpeed - currentSpeed) * 0.15;
-        if (Math.abs(currentSpeed - targetSpeed) < 0.05) {
-            currentSpeed = targetSpeed;
-        }
-
-        digitalSpeed.textContent = Math.round(currentSpeed);
-        drawSpeedometer();
-        requestAnimationFrame(update);
+    function updateDashboard() {
+      currentSpeed += (targetSpeed - currentSpeed) * 0.15;
+      if (Math.abs(currentSpeed - targetSpeed) < 0.05) currentSpeed = targetSpeed;
+      speedValue.textContent = Math.round(currentSpeed);
+      drawDial();
+      requestAnimationFrame(updateDashboard);
     }
 
-    // Changement de vitesse via le slider
-    speedInput.addEventListener('input', (e) => {
-        targetSpeed = parseFloat(e.target.value);
+    speedInput.addEventListener('input', (event) => {
+      targetSpeed = parseFloat(event.target.value);
     });
 
-    // Optionnel : Utilisation de la vraie géolocalisation pour la vitesse réelle en déplacement
-    if ('geolocation' in navigator) {
-        navigator.geolocation.watchPosition((position) => {
-            if (position.coords.speed !== null) {
-                // Convertit m/s en km/h
-                let kmh = position.coords.speed * 3.6;
-                if (kmh < 0) kmh = 0;
-                targetSpeed = Math.min(kmh, maxSpeed);
-                speedInput.value = targetSpeed;
-            }
-        }, (error) => {
-            console.log("Mode simulation actif via le slider inférieur.");
-        }, {
-            enableHighAccuracy: true,
-            maximumAge: 0,
-            timeout: 5000
-        });
-    }
-
-    // Lancement de l'affichage
-    update();
-</script>
-
+    drawDial();
+    updateDashboard();
+  </script>
 </body>
 </html>
