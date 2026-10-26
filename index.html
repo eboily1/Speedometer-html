@@ -1,453 +1,206 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Speedometer Pro</title>
-  <style>
-    :root {
-      --bg: #000000;
-      --panel-bg: rgba(6, 18, 31, 0.84);
-      --panel-border: rgba(40, 146, 255, 0.92);
-      --glow: rgba(24, 145, 255, 0.84);
-      --dial-outside: #050d15;
-      --dial-mid: #081b28;
-      --dial-inner: #edf2f7;
-      --digit: rgba(8, 18, 27, 0.9);
-      --muted: rgba(17, 27, 36, 0.8);
-      --blue: #1d9bff;
-      --blue-soft: #60d6ff;
-      --needle: #1f9dff;
-      --needle-deep: #0d7eea;
-      --panel-text: rgba(228, 240, 255, 0.9);
-      --trip-bg: rgba(143, 176, 208, 0.18);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de Bord Fonctionnel</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #030a16;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #fff;
+            overflow: hidden;
+        }
 
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #000;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
+        /* Conteneur calé sur les proportions de l'image */
+        .dashboard-container {
+            position: relative;
+            width: 960px;  
+            height: 540px; 
+            
+            /* APPEL DE L'IMAGE LOCALE TRÈS LÉGER */
+            background-image: url('dashboard.png'); 
+            background-size: cover;
+            background-position: center;
+            border-radius: 16px;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9);
+        }
 
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #000;
-    }
+        /* Masque de couleur identique au fond pour masquer le "0" d'origine */
+        .center-mask {
+            position: absolute;
+            top: 41%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 110px;
+            height: 100px;
+            background: #041126; 
+            border-radius: 50%;
+            z-index: 1;
+        }
 
-    .scene {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      background: #000;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+        /* --- Vitesse Actuelle (Centre) --- */
+        .vitesse-actuelle {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 6.5rem;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(0, 153, 255, 0.6);
+            z-index: 3;
+        }
 
-    .scene::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at center, rgba(19, 116, 255, 0.16), rgba(0,0,0,0) 38%);
-      pointer-events: none;
-    }
+        /* --- Kilométrage TRIP --- */
+        .trip-val {
+            position: absolute;
+            bottom: 21.5%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #193663;
+            border: 1px solid #0099ff;
+            padding: 4px 20px;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 15px rgba(0,153,255,0.4);
+            z-index: 3;
+        }
 
-    .panel {
-      position: absolute;
-      top: 50%;
-      width: 330px;
-      height: 190px;
-      transform: translateY(-50%);
-      background: linear-gradient(180deg, rgba(5, 17, 29, 0.88), rgba(4, 15, 26, 0.78));
-      border: 2px solid var(--panel-border);
-      border-radius: 18px;
-      box-shadow:
-        0 0 0 2px rgba(5, 15, 24, 0.9),
-        inset 0 0 18px rgba(8, 22, 34, 0.8),
-        0 0 22px rgba(18, 130, 255, 0.8),
-        0 0 42px rgba(18, 130, 255, 0.18);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 24px 24px 18px 28px;
-      z-index: 2;
-    }
+        /* --- Vitesse Max (Gauche) --- */
+        .vitesse-max-val {
+            position: absolute;
+            top: 45.5%;
+            left: 14.8%;
+            transform: translate(-50%, -50%);
+            font-size: 4.5rem;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(255,255,255,0.3);
+            z-index: 3;
+        }
 
-    .panel.left { left: 50px; }
-    .panel.right { right: 50px; }
+        /* --- Horloge (Droite) --- */
+        .horloge-val {
+            position: absolute;
+            top: 46%;
+            right: 14.8%;
+            transform: translate(50%, -50%);
+            font-size: 4.3rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(255,255,255,0.3);
+            z-index: 3;
+        }
 
-    .panel-label {
-      font-size: 15px;
-      letter-spacing: 0.18em;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: rgba(233, 242, 255, 0.92);
-      margin-bottom: 20px;
-      padding-left: 6px;
-    }
+        /* --- L'Aiguille Bleue Dynamique --- */
+        .aiguille {
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            width: 4px;
+            height: 35%; 
+            background: linear-gradient(to top, transparent 30%, #00a2ff 100%);
+            transform-origin: bottom center;
+            transform: rotate(-140deg); 
+            transition: transform 0.08s linear;
+            box-shadow: 0 0 15px #00a2ff;
+            z-index: 2;
+        }
 
-    .panel-value {
-      display: flex;
-      align-items: flex-end;
-      line-height: 0.82;
-      letter-spacing: -0.08em;
-      color: rgba(245, 249, 255, 0.96);
-      font-weight: 300;
-    }
-
-    .panel-value .big {
-      font-size: clamp(56px, 4vw, 108px);
-      font-weight: 300;
-    }
-
-    .panel-value .unit {
-      font-size: 22px;
-      letter-spacing: 0.06em;
-      color: rgba(228, 240, 255, 0.72);
-      margin-left: 10px;
-      margin-bottom: 11px;
-      text-transform: lowercase;
-    }
-
-    .panel.right .panel-value {
-      width: 100%;
-      justify-content: flex-start;
-    }
-
-    .dial-wrap {
-      position: relative;
-      width: min(75vw, 790px);
-      height: min(75vw, 790px);
-      max-width: 790px;
-      max-height: 790px;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .dial-glow {
-      position: absolute;
-      inset: 5% 8% 2% 8%;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(32, 154, 255, 0.48), rgba(14, 87, 184, 0.18) 34%, rgba(0,0,0,0) 68%);
-      filter: blur(28px);
-      transform: scale(1.12);
-      pointer-events: none;
-    }
-
-    .dial {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: linear-gradient(180deg, #02080d 0%, #020e18 16%, #030d15 42%, #050d18 100%);
-      box-shadow:
-        0 0 0 18px rgba(6, 17, 25, 0.96),
-        0 0 0 22px rgba(9, 20, 28, 0.94),
-        0 0 28px rgba(21, 127, 255, 0.8),
-        0 0 72px rgba(21, 127, 255, 0.62),
-        0 0 120px rgba(21, 127, 255, 0.28),
-        inset 0 0 30px rgba(0, 0, 0, 0.78);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .dial::before {
-      content: "";
-      position: absolute;
-      inset: 14px;
-      border-radius: 50%;
-      border: 1px solid rgba(17, 35, 48, 0.52);
-      pointer-events: none;
-    }
-
-    .dial-inner {
-      position: absolute;
-      inset: 54px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 50% 30%, rgba(255,255,255,1), rgba(235,239,244,1) 58%, rgba(220,226,232,1) 100%);
-      box-shadow: inset 0 0 18px rgba(0,0,0,0.12);
-      overflow: hidden;
-    }
-
-    .dial-inner::before {
-      content: "";
-      position: absolute;
-      inset: 20px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 50% 33%, rgba(255,255,255,0.9), rgba(255,255,255,0) 58%);
-      pointer-events: none;
-    }
-
-    #gauge {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      overflow: visible;
-      z-index: 2;
-    }
-
-    .center-readout {
-      position: absolute;
-      left: 50%;
-      top: 52%;
-      transform: translate(-50%, -50%);
-      width: 56%;
-      height: 56%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      z-index: 4;
-      pointer-events: none;
-    }
-
-    .speed-readout {
-      font-size: clamp(88px, 7.2vw, 158px);
-      line-height: 0.8;
-      letter-spacing: -0.1em;
-      font-weight: 300;
-      color: rgba(11, 19, 27, 0.9);
-    }
-
-    .kmh {
-      margin-top: 10px;
-      font-size: 26px;
-      letter-spacing: 0.04em;
-      font-weight: 500;
-      color: rgba(18, 24, 31, 0.72);
-    }
-
-    .trip-line {
-      width: 124px;
-      height: 4px;
-      margin-top: 18px;
-      border-radius: 4px;
-      background: rgba(17, 31, 41, 0.74);
-    }
-
-    .trip-label {
-      margin-top: 12px;
-      font-size: 16px;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      font-weight: 700;
-      color: rgba(12, 20, 29, 0.8);
-    }
-
-    .trip-box {
-      position: absolute;
-      left: 50%;
-      bottom: 28px;
-      transform: translateX(-50%);
-      background: rgba(132, 171, 207, 0.2);
-      border-radius: 12px;
-      padding: 10px 20px 11px;
-      font-size: 18px;
-      color: rgba(12, 25, 37, 0.84);
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      box-shadow: inset 0 0 12px rgba(120, 150, 180, 0.18);
-      z-index: 5;
-      pointer-events: none;
-    }
-
-    .hidden-slider {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    @media (max-width: 1100px) {
-      .panel { width: 260px; height: 170px; }
-      .panel.left { left: 22px; }
-      .panel.right { right: 22px; }
-      .panel-label { font-size: 12px; }
-      .panel-value .big { font-size: 54px; }
-    }
-
-    @media (max-width: 760px) {
-      .panel { width: 180px; height: 120px; padding: 14px 14px; }
-      .panel-label { font-size: 9px; letter-spacing: 0.12em; margin-bottom: 8px; }
-      .panel-value .big { font-size: 40px; }
-      .panel-value .unit { font-size: 11px; margin-left: 6px; margin-bottom: 4px; }
-      .dial-wrap { width: 92vw; height: 92vw; }
-    }
-  </style>
+        .needle-pivot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #fff;
+        }
+    </style>
 </head>
 <body>
-  <div class="scene">
-    <div class="panel left">
-      <div class="panel-label">VITESSE MAX</div>
-      <div class="panel-value">
-        <span class="big">129</span>
-        <span class="unit">km/h</span>
-      </div>
-    </div>
 
-    <div class="dial-wrap">
-      <div class="dial-glow"></div>
-      <div class="dial">
-        <div class="dial-inner"></div>
-        <svg id="gauge" viewBox="0 0 600 600" aria-label="Speedometer gauge" role="img"></svg>
-        <div class="center-readout">
-          <div class="speed-readout">0</div>
-          <div class="kmh">km/h</div>
-          <div class="trip-line"></div>
-          <div class="trip-label">TRIP</div>
+    <div class="dashboard-container">
+        <!-- Cache le vieux texte fixe de l'image -->
+        <div class="center-mask"></div>
+
+        <!-- Textes et aiguille dynamiques -->
+        <div class="vitesse-max-val" id="max-speed">129</div>
+        
+        <div class="aiguille" id="needle">
+            <div class="needle-pivot"></div>
         </div>
-        <div class="trip-box">0.0 km</div>
-      </div>
+        
+        <div class="vitesse-actuelle" id="current-speed">0</div>
+        <div class="trip-val" id="odometer">0.0 km</div>
+
+        <div class="horloge-val" id="clock">12:40</div>
     </div>
 
-    <div class="panel right">
-      <div class="panel-label">HEURE</div>
-      <div class="panel-value">
-        <span class="big">12:40</span>
-      </div>
-    </div>
-
-    <input id="speed-input" class="hidden-slider" type="range" min="0" max="100" value="0" />
-  </div>
-
-  <script>
-    const svg = document.getElementById('gauge');
-    const speedReadout = document.querySelector('.speed-readout');
-    const speedInput = document.getElementById('speed-input');
-
-    const cx = 300;
-    const cy = 300;
-    const outerRadius = 260;
-    const startAngle = (210 * Math.PI) / 180;
-    const endAngle = (330 * Math.PI) / 180;
-    const totalTicks = 100;
-
-    function valueToAngle(value) {
-      return startAngle + (value / totalTicks) * (endAngle - startAngle);
-    }
-
-    function createSVG(tag, attrs = {}) {
-      const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
-      Object.entries(attrs).forEach(([key, value]) => el.setAttribute(key, value));
-      return el;
-    }
-
-    function drawGauge() {
-      svg.innerHTML = '';
-
-      const defs = createSVG('defs');
-      const grad = createSVG('linearGradient', { id: 'needleGrad', x1: '0%', y1: '0%', x2: '100%', y2: '0%' });
-      const stop1 = createSVG('stop', { offset: '0%', 'stop-color': '#8fe1ff' });
-      const stop2 = createSVG('stop', { offset: '40%', 'stop-color': '#32b6ff' });
-      const stop3 = createSVG('stop', { offset: '100%', 'stop-color': '#0d7be9' });
-      grad.appendChild(stop1); grad.appendChild(stop2); grad.appendChild(stop3); defs.appendChild(grad);
-      svg.appendChild(defs);
-
-      const arc = createSVG('path', {
-        d: `M ${cx + Math.cos(startAngle) * outerRadius} ${cy + Math.sin(startAngle) * outerRadius} A ${outerRadius} ${outerRadius} 0 0 1 ${cx + Math.cos(endAngle) * outerRadius} ${cy + Math.sin(endAngle) * outerRadius}`,
-        fill: 'none',
-        stroke: 'rgba(23, 143, 255, 0.86)',
-        'stroke-width': '2.6',
-        'stroke-linecap': 'round'
-      });
-      svg.appendChild(arc);
-
-      for (let i = 0; i <= totalTicks; i += 10) {
-        const angle = valueToAngle(i);
-        const isMajor = i % 20 === 0;
-        const tickLength = isMajor ? 18 : 10;
-
-        const x1 = cx + Math.cos(angle) * outerRadius;
-        const y1 = cy + Math.sin(angle) * outerRadius;
-        const x2 = cx + Math.cos(angle) * (outerRadius - tickLength);
-        const y2 = cy + Math.sin(angle) * (outerRadius - tickLength);
-
-        const line = createSVG('line', {
-          x1, y1, x2, y2,
-          stroke: isMajor ? '#0a2336' : '#0f5cb8',
-          'stroke-width': isMajor ? '2.2' : '1.2',
-          'stroke-linecap': 'round'
-        });
-        svg.appendChild(line);
-
-        if (isMajor) {
-          const labelRadius = 156;
-          const tx = cx + Math.cos(angle) * labelRadius;
-          const ty = cy + Math.sin(angle) * labelRadius;
-          const text = createSVG('text', {
-            x: tx,
-            y: ty,
-            fill: '#0b2337',
-            'font-size': 28,
-            'font-weight': 700,
-            'font-family': 'system-ui, sans-serif',
-            'text-anchor': 'middle',
-            'dominant-baseline': 'middle'
-          });
-          text.textContent = String(i);
-          svg.appendChild(text);
+    <script>
+        // 1. Horloge système réelle
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('clock').innerText = `${hours}:${minutes}`;
         }
-      }
+        setInterval(updateClock, 1000);
+        updateClock();
 
-      const needleAngle = valueToAngle(0);
-      const needleLength = 150;
-      const needleHalf = 18;
-      const left = cx + Math.cos(needleAngle - Math.PI / 2) * needleHalf;
-      const top = cy + Math.sin(needleAngle - Math.PI / 2) * needleHalf;
-      const tipX = cx + Math.cos(needleAngle) * needleLength;
-      const tipY = cy + Math.sin(needleAngle) * needleLength;
-      const right = cx + Math.cos(needleAngle + Math.PI / 2) * needleHalf;
-      const bottom = cy + Math.sin(needleAngle + Math.PI / 2) * needleHalf;
+        // 2. Script d'animation du compteur
+        const speedEl = document.getElementById('current-speed');
+        const maxSpeedEl = document.getElementById('max-speed');
+        const needle = document.getElementById('needle');
+        const odometerEl = document.getElementById('odometer');
+        
+        let speed = 0;
+        let maxSpeed = 129;
+        let distance = 0.0;
+        let accelerating = true;
 
-      const needle = createSVG('path', {
-        d: `M ${left} ${top} L ${tipX} ${tipY} L ${right} ${bottom} Z`,
-        fill: 'url(#needleGrad)',
-        opacity: '1'
-      });
-      svg.appendChild(needle);
+        setInterval(() => {
+            if (accelerating) {
+                speed += Math.random() * 2.2;
+                if (speed >= 105) accelerating = false; 
+            } else {
+                speed -= Math.random() * 2.8;
+                if (speed <= 0) {
+                    speed = 0;
+                    accelerating = true;
+                }
+            }
 
-      const cap = createSVG('circle', {
-        cx,
-        cy,
-        r: 12,
-        fill: '#111111',
-        stroke: '#2b2b2b',
-        'stroke-width': '1.5'
-      });
-      svg.appendChild(cap);
-    }
+            const currentActualSpeed = Math.floor(speed);
+            speedEl.innerText = currentActualSpeed;
 
-    let currentSpeed = 0;
-    let targetSpeed = 0;
+            if (currentActualSpeed > maxSpeed) {
+                maxSpeed = currentActualSpeed;
+                maxSpeedEl.innerText = maxSpeed;
+            }
 
-    function updateGauge() {
-      currentSpeed += (targetSpeed - currentSpeed) * 0.12;
-      if (Math.abs(targetSpeed - currentSpeed) < 0.05) currentSpeed = targetSpeed;
-      speedReadout.textContent = Math.round(currentSpeed);
-      drawGauge();
-      requestAnimationFrame(updateGauge);
-    }
+            // Gestion de l'angle de l'aiguille (-140deg à +140deg)
+            const cappedSpeed = Math.min(Math.max(currentActualSpeed, 0), 100);
+            const angle = -140 + (cappedSpeed * 2.8); 
+            needle.style.transform = `rotate(${angle}deg)`;
 
-    speedInput.addEventListener('input', (event) => {
-      targetSpeed = Number(event.target.value);
-    });
+            // Calcul de la distance parcourue
+            distance += (speed / 3600) * 0.1;
+            odometerEl.innerText = `${distance.toFixed(1)} km`;
 
-    drawGauge();
-    updateGauge();
-  </script>
+        }, 100);
+    </script>
 </body>
 </html>
