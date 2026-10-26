@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- BALISES MAGIQUES POUR SUPPRIMER LA BARRE DE NAVIGATION SUR IPHONE -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Dashboard GPS">
+
     <title>Tableau de Bord GPS iPhone 7</title>
     <style>
         * {
@@ -10,7 +16,7 @@
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Roboto, sans-serif;
-            -webkit-user-select: none; /* Évite les sélections de texte accidentelles sur iPhone */
+            -webkit-user-select: none;
             user-select: none;
         }
 
@@ -20,30 +26,28 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            min-height: -webkit-fill-available; /* Correction hauteur Safari iOS */
+            min-height: -webkit-fill-available;
             color: #fff;
             overflow: hidden;
         }
 
-        /* Le conteneur épouse désormais 100% de la largeur et de la hauteur visibles de l'iPhone */
         .dashboard-container {
             position: relative;
             width: 100vw;  
             height: 100vh; 
             height: -webkit-fill-available;
             background-image: url('./dashboard.png'); 
-            background-size: 100% 100%; /* Force l'image à s'étirer parfaitement sur tout l'écran */
+            background-size: 100% 100%;
             background-position: center;
             background-repeat: no-repeat;
         }
 
-        /* --- Alignements fluides basés sur les pourcentages de l'écran mobile --- */
         .vitesse-max-val {
             position: absolute;
             top: 45.5%;
             left: 14.0%; 
             transform: translate(-50%, -50%);
-            font-size: 7.5vh; /* Taille proportionnelle à la hauteur de l'écran */
+            font-size: 7.5vh;
             font-weight: 700;
             color: #ffffff;
             text-shadow: 0 0 15px rgba(255,255,255,0.3);
@@ -89,12 +93,11 @@
             letter-spacing: 1px;
         }
 
-        /* --- L'Aiguille s'adapte dynamiquement au ratio du compteur --- */
         .aiguille-wrapper {
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 66vh; /* Le cadran central dépend uniquement de la hauteur de l'écran */
+            width: 66vh;
             height: 66vh;
             transform: translate(-50%, -50%);
             z-index: 2;
@@ -144,7 +147,6 @@
             text-shadow: 0 0 10px #00ff66;
         }
 
-        /* Message d'alerte si le téléphone est tenu verticalement (Mode Portrait) */
         .orientation-warning {
             display: none;
             position: fixed;
@@ -175,10 +177,9 @@
 </head>
 <body>
 
-    <!-- Alerte pour l'iPhone -->
     <div class="orientation-warning">
         <p style="font-size: 2rem; margin-bottom: 10px;">🔄</p>
-        <p>Veuillez tourner votre iPhone en <b>mode paysage</b> pour afficher le tableau de bord.</p>
+        <p>Veuillez tourner votre iPhone en <b>mode paysage</b>.</p>
     </div>
 
     <div class="dashboard-container">
@@ -195,7 +196,6 @@
     </div>
 
     <script>
-        // --- Horloge ---
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').innerText = 
@@ -204,7 +204,6 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // --- GPS Logic ---
         const speedEl = document.getElementById('current-speed');
         const maxSpeedEl = document.getElementById('max-speed');
         const needle = document.getElementById('needle');
@@ -260,6 +259,7 @@
             gpsStatusEl.innerText = "Signal GPS faible...";
         }
 
+        // Haversine formula
         function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 6371; 
             const dLat = (lat2 - lat1) * Math.PI / 180;
