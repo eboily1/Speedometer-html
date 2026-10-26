@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tableau de Bord Fonctionnel</title>
+    <title>Tableau de Bord GPS iPhone</title>
     <style>
         * {
             box-sizing: border-box;
@@ -22,122 +22,150 @@
             overflow: hidden;
         }
 
-        /* Conteneur calé sur les proportions de l'image */
+        /* Conteneur principal calé sur les proportions de l'image originale */
         .dashboard-container {
             position: relative;
-            width: 960px;  
-            height: 540px; 
-            
-            /* APPEL DE L'IMAGE LOCALE TRÈS LÉGER */
-            background-image: url('./dashboard.png');
+            width: 1024px;  
+            height: 576px; 
+            background-image: url('./dashboard.png'); 
             background-size: cover;
             background-position: center;
             border-radius: 16px;
             box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9);
         }
 
-        /* --- Vitesse Actuelle (Centre) --- */
-        .vitesse-actuelle {
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 6.5rem;
-            font-weight: 700;
-            text-shadow: 0 0 20px rgba(0, 153, 255, 0.6);
-            z-index: 3;
-        }
-
-        /* --- Kilométrage TRIP --- */
-        .trip-val {
-            position: absolute;
-            bottom: 20%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #193663;
-            border: 1px solid #0099ff;
-            padding: 4px 20px;
-            border-radius: 4px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 0 15px rgba(0,153,255,0.4);
-            z-index: 3;
-        }
-
-        /* --- Vitesse Max (Gauche) --- */
+        /* --- Alignement Vitesse Max (Panneau Gauche) --- */
         .vitesse-max-val {
             position: absolute;
             top: 45.5%;
-            left: 14%;
+            left: 14.0%; 
             transform: translate(-50%, -50%);
-            font-size: 4.5rem;
+            font-size: 4.8rem;
             font-weight: 700;
+            color: #ffffff;
             text-shadow: 0 0 15px rgba(255,255,255,0.3);
-            z-index: 3;
+            text-align: center;
+            width: 180px;
         }
 
-        /* --- Horloge (Droite) --- */
+        /* --- Alignement Horloge (Panneau Droite) --- */
         .horloge-val {
             position: absolute;
-            top: 46%;
-            right: 14%;
+            top: 47%;
+            right: 14.0%; 
             transform: translate(50%, -50%);
-            font-size: 4.3rem;
+            font-size: 4.5rem;
             font-weight: 700;
+            color: #ffffff;
             letter-spacing: 2px;
             text-shadow: 0 0 15px rgba(255,255,255,0.3);
-            z-index: 3;
+            text-align: center;
+            width: 220px;
         }
 
-        /* --- L'Aiguille Bleue Dynamique --- */
-        .aiguille {
+        /* --- Alignement Vitesse Actuelle (Centre) --- */
+        .vitesse-actuelle {
             position: absolute;
-            top: 15%;
+            top: 41%;
             left: 50%;
-            width: 4px;
-            height: 35%; 
-            background: linear-gradient(to top, transparent 30%, #00a2ff 100%);
-            transform-origin: bottom center;
-            transform: rotate(-140deg); 
-            transition: transform 0.08s linear;
-            box-shadow: 0 0 15px #00a2ff;
-            z-index: 2;
+            transform: translate(-50%, -50%);
+            font-size: 6.8rem;
+            font-weight: 700;
+            text-shadow: 0 0 25px rgba(0, 153, 255, 0.6);
+            z-index: 5;
         }
 
-        .needle-pivot {
+        /* --- Alignement Kilométrage TRIP : Descendu encore plus bas --- */
+        .trip-val {
+            position: absolute;
+            bottom: 20.0%; /* Ajusté de 21.2% à 20.0% pour se centrer au milieu de la case */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(0, 153, 255, 0.8);
+            z-index: 5;
+            letter-spacing: 1px;
+        }
+
+        /* --- L'Aiguille (Masquée au centre, visible uniquement sur la partie blanche) --- */
+        .aiguille-wrapper {
             position: absolute;
             top: 50%;
             left: 50%;
+            width: 380px; 
+            height: 380px;
             transform: translate(-50%, -50%);
-            width: 12px;
-            height: 12px;
-            background: #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #fff;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .aiguille {
+            position: absolute;
+            top: 0;
+            left: calc(50% - 3px);
+            width: 6px;
+            height: 100%; 
+            transform-origin: center center;
+            transform: rotate(-140deg); 
+            transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+            
+            -webkit-mask-image: radial-gradient(circle, transparent 76%, black 77%);
+            mask-image: radial-gradient(circle, transparent 76%, black 77%);
+        }
+
+        .aiguille::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 24%; 
+            background: linear-gradient(to top, #0066ff 0%, #00d9ff 100%);
+            box-shadow: 0 0 15px #00a2ff, 0 0 5px #fff;
+            border-radius: 4px;
+        }
+
+        .gps-status {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            color: #ff3333;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .gps-status.active {
+            color: #00ff66;
+            text-shadow: 0 0 10px #00ff66;
         }
     </style>
 </head>
 <body>
 
     <div class="dashboard-container">
-        <!-- Cache le vieux texte fixe de l'image -->
-        <div class="center-mask"></div>
+        <!-- Statut GPS -->
+        <div class="gps-status" id="gps-status">GPS Déconnecté</div>
 
-        <!-- Textes et aiguille dynamiques -->
-        <div class="vitesse-max-val" id="max-speed">129</div>
-        
-        <div class="aiguille" id="needle">
-            <div class="needle-pivot"></div>
+        <!-- Panneau Gauche -->
+        <div class="vitesse-max-val" id="max-speed">0</div>
+
+        <!-- Compteur Central -->
+        <div class="aiguille-wrapper">
+            <div class="aiguille" id="needle"></div>
         </div>
-        
         <div class="vitesse-actuelle" id="current-speed">0</div>
         <div class="trip-val" id="odometer">0.0 km</div>
 
-        <div class="horloge-val" id="clock">12:40</div>
+        <!-- Panneau Droite -->
+        <div class="horloge-val" id="clock">00:00</div>
     </div>
 
     <script>
-        // 1. Horloge système réelle
+        // --- 1. Gestion de l'Horloge ---
         function updateClock() {
             const now = new Date();
             const hours = now.getHours().toString().padStart(2, '0');
@@ -147,47 +175,88 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // 2. Script d'animation du compteur
+        // --- 2. Variables de calcul et éléments du DOM ---
         const speedEl = document.getElementById('current-speed');
         const maxSpeedEl = document.getElementById('max-speed');
         const needle = document.getElementById('needle');
         const odometerEl = document.getElementById('odometer');
+        const gpsStatusEl = document.getElementById('gps-status');
         
-        let speed = 0;
-        let maxSpeed = 129;
-        let distance = 0.0;
-        let accelerating = true;
+        let maxSpeed = 0;
+        let totalDistance = 0.0;
+        let lastPosition = null;
 
-        setInterval(() => {
-            if (accelerating) {
-                speed += Math.random() * 2.2;
-                if (speed >= 105) accelerating = false; 
-            } else {
-                speed -= Math.random() * 2.8;
-                if (speed <= 0) {
-                    speed = 0;
-                    accelerating = true;
-                }
+        // --- 3. Intégration du GPS Réel ---
+        if ("geolocation" in navigator) {
+            const geoOptions = {
+                enableHighAccuracy: true, 
+                maximumAge: 0,            
+                timeout: 5000             
+            };
+
+            navigator.geolocation.watchPosition(updateGPSData, handleGPSError, geoOptions);
+        } else {
+            gpsStatusEl.innerText = "GPS non supporté";
+        }
+
+        function updateGPSData(position) {
+            gpsStatusEl.innerText = "GPS Actif";
+            gpsStatusEl.classList.add('active');
+
+            let speedMS = position.coords.speed;
+            let currentSpeed = 0;
+
+            if (speedMS !== null && speedMS > 0) {
+                currentSpeed = Math.floor(speedMS * 3.6);
             }
 
-            const currentActualSpeed = Math.floor(speed);
-            speedEl.innerText = currentActualSpeed;
+            speedEl.innerText = currentSpeed;
 
-            if (currentActualSpeed > maxSpeed) {
-                maxSpeed = currentActualSpeed;
+            if (currentSpeed > maxSpeed) {
+                maxSpeed = currentSpeed;
                 maxSpeedEl.innerText = maxSpeed;
             }
 
-            // Gestion de l'angle de l'aiguille (-140deg à +140deg)
-            const cappedSpeed = Math.min(Math.max(currentActualSpeed, 0), 100);
+            const cappedSpeed = Math.min(Math.max(currentSpeed, 0), 100);
             const angle = -140 + (cappedSpeed * 2.8); 
             needle.style.transform = `rotate(${angle}deg)`;
 
-            // Calcul de la distance parcourue
-            distance += (speed / 3600) * 0.1;
-            odometerEl.innerText = `${distance.toFixed(1)} km`;
+            if (lastPosition) {
+                const distanceIncrement = calculateDistance(
+                    lastPosition.coords.latitude, lastPosition.coords.longitude,
+                    position.coords.latitude, position.coords.longitude
+                );
+                totalDistance += distanceIncrement;
+                odometerEl.innerText = `${totalDistance.toFixed(1)} km`;
+            }
+            lastPosition = position;
+        }
 
-        }, 100);
+        function handleGPSError(error) {
+            gpsStatusEl.classList.remove('active');
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    gpsStatusEl.innerText = "Autorisez l'accès GPS";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    gpsStatusEl.innerText = "Signal GPS perdu";
+                    break;
+                case error.TIMEOUT:
+                    gpsStatusEl.innerText = "Recherche de signal...";
+                    break;
+            }
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; 
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
     </script>
 </body>
 </html>
